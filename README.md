@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 This repo is cloned fromm the link below:  
 https://github.com/raghakot/keras-resnet.git
 
@@ -45,3 +46,6 @@ Includes cifar10 training example. Achieves ~86% accuracy using Resnet18 model.
 Note that ResNet18 as implemented doesn't really seem appropriate for CIFAR-10 as the last two residual stages end up 
 as all 1x1 convolutions from downsampling (stride). This is worse for deeper versions. A smaller, modified ResNet-like 
 architecture achieves ~92% accuracy (see [gist](https://gist.github.com/JefferyRPrice/c1ecc3d67068c8d9b3120475baba1d7e)). 
+=======
+# DL_training
+>>>>>>> 6e3aa48a5cb01f7a7cafc2f8cee97476eb443bfb
