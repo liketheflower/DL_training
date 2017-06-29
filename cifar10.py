@@ -21,7 +21,7 @@ csv_logger = CSVLogger('resnet18_cifar10.csv')
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 200
+nb_epoch = 2
 data_augmentation = True
 
 # input image dimensions
@@ -50,7 +50,7 @@ model = resnet.ResnetBuilder.build_resnet_18((img_channels, img_rows, img_cols),
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
-
+print(model.summary())
 if not data_augmentation:
     print('Not using data augmentation.')
     model.fit(X_train, Y_train,
