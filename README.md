@@ -1,10 +1,7 @@
 This repo is cloned fromm the link below:  
 https://github.com/raghakot/keras-resnet.git
 
-Associate the account with github.
-
-
-test:
+Associate the account with github.:
 
 # keras-resnet
 [![Build Status](https://travis-ci.org/raghakot/keras-resnet.svg?branch=master)](https://travis-ci.org/raghakot/keras-resnet)
