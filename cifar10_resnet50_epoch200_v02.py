@@ -12,21 +12,16 @@ from keras.utils import np_utils
 from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
 
 import numpy as np
-#import resnet
-import resnetpa
+import resnet
 
-m keras import backend as K
-K.set_image_dim_ordering('th')
-# fix random seed for reproducibility
-seed = 7
-numpy.random.seed(seed)
+
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
-early_stopper = EarlyStopping(min_delta=0.001, patience=100)
-csv_logger = CSVLogger('resnetpa_new_cifar10.csv')
+early_stopper = EarlyStopping(min_delta=0.001, patience=200)
+csv_logger = CSVLogger('./results/resnet50_cifar10.csv')
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 2
+nb_epoch = 200
 data_augmentation = True
 
 # input image dimensions
@@ -36,31 +31,6 @@ img_channels = 3
 
 # The data, shuffled and split between train and test sets:
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
-
-
-print(X_train.shape)
-
-
-#X_train = X_train.reshape(X_train.shape[0], 3, img_rows, img_cols)
-#X_test = X_test.reshape(X_test.shape[0], 3, img_rows, img_cols)
-
-
-#print (X_train.shape)
-'''
-if K.image_data_format() == 'channels_first':
-    x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
-    x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
-    input_shape = (1, img_rows, img_cols)
-else:
-    x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 3)
-    x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 3)
-    input_shape = (img_rows, img_cols, 1)
-
-
-
-'''
-
-
 
 # Convert class vectors to binary class matrices.
 Y_train = np_utils.to_categorical(y_train, nb_classes)
@@ -75,16 +45,11 @@ X_train -= mean_image
 X_test -= mean_image
 X_train /= 128.
 X_test /= 128.
-print("ss")
 
-#model = resnet.ResnetBuilder.build_resnet_18((img_channels, img_rows, img_cols), nb_classes)
-model = resnetpa.ResNetPreAct((img_channels, img_rows, img_cols), nb_classes)
-print ("ss2")
+model = resnet.ResnetBuilder.build_resnet_50((img_channels, img_rows, img_cols), nb_classes)
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
-
-print("ss3")
 print(model.summary())
 if not data_augmentation:
     print('Not using data augmentation.')
