@@ -15,11 +15,11 @@ import numpy as np
 #import resnet
 import resnetpa
 
-m keras import backend as K
+from keras import backend as K
 K.set_image_dim_ordering('th')
 # fix random seed for reproducibility
 seed = 7
-numpy.random.seed(seed)
+np.random.seed(seed)
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
 early_stopper = EarlyStopping(min_delta=0.001, patience=100)
 csv_logger = CSVLogger('resnetpa_new_cifar10.csv')

@@ -51,7 +51,7 @@ csv_logger = CSVLogger('./results/vgg16imagenetpretrained_cifar10.csv')
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 200
+nb_epoch = 2
 data_augmentation = True
 
 # input image dimensions

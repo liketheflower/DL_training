@@ -10,31 +10,37 @@ from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import np_utils
 from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
-
+from scipy.misc import toimage, imresize
 import numpy as np
 #import resnet
 from keras.applications.resnet50 import ResNet50
 from keras.preprocessing import image
-from keras.applications.vgg16 import preprocess_input
+from keras.applications.resnet50 import preprocess_input
 from keras.layers import Input, Flatten, Dense
 from keras.models import Model
 import numpy as np
 
 
+from keras import backend as K
+#K.set_image_dim_ordering('th')
+# fix random seed for reproducibility
+seed = 7
+np.random.seed(seed)
+
 
 def get_vgg_pretrained_model():
     #Get back the convolutional part of a VGG network trained on ImageNet
-    model_vgg16_conv = ResNet50(weights='imagenet', include_top=False)
-    print(model_vgg16_conv.summary())
+    model_resnet50_conv = ResNet50(weights='imagenet', include_top=False)
+    print(model_resnet50_conv.summary())
     print("ss")
-    #Create your own input format (here 3x200x200)
+    #Create your own input format (here 3x200x2000)
     input = Input(shape=(3,32,32),name = 'image_input')
 
     #Use the generated model 
-    output_vgg16_conv = model_vgg16_conv(input)
+    output_resnet50_conv = model_resnet50_conv(input)
 
     #Add the fully-connected layers 
-    x = Flatten(name='flatten')(output_vgg16_conv)
+    x = Flatten(name='flatten')(output_resnet50_conv)
     x = Dense(512, activation='relu', name='fc1')(x)
     x = Dense(128, activation='relu', name='fc2')(x)
     x = Dense(10, activation='softmax', name='predictions')(x)
@@ -47,7 +53,7 @@ def get_vgg_pretrained_model():
     return my_model
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
 early_stopper = EarlyStopping(min_delta=0.001, patience=100)
-csv_logger = CSVLogger('./results/resnet50_imagenetpretrained_cifar10.csv')
+csv_logger = CSVLogger('./results/resnet50imagenetpretrained_cifar10.csv')
 
 batch_size = 32
 nb_classes = 10
@@ -55,19 +61,34 @@ nb_epoch = 2
 data_augmentation = True
 
 # input image dimensions
-img_rows, img_cols = 32, 32
+img_rows, img_cols = 197, 197
+I_R = 197
 # The CIFAR10 images are RGB.
 img_channels = 3
 
 # The data, shuffled and split between train and test sets:
-(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+(X_train_original, y_train), (X_test_original, y_test) = cifar10.load_data()
 
 # Convert class vectors to binary class matrices.
 Y_train = np_utils.to_categorical(y_train, nb_classes)
 Y_test = np_utils.to_categorical(y_test, nb_classes)
 
-X_train = X_train.astype('float32')
-X_test = X_test.astype('float32')
+X_train_original = X_train_original.astype('float32')
+X_test_original = X_test_original.astype('float32')
+
+
+# upsample it to size 224X224X3
+
+
+X_train = np.zeros((X_train_original.shape[0],I_R,I_R,3))
+for i in range(X_train_original.shape[0]):
+    X_train[i] = imresize(X_train_original[i], (I_R,I_R,3), interp='bilinear', mode=None)
+
+
+X_test = np.zeros((X_test_original.shape[0],I_R,I_R,3))
+for i in range(X_test_original.shape[0]):
+    X_test[i] = imresize(X_test_original[i], (I_R,I_R,3), interp='bilinear', mode=None)
+
 
 # subtract mean and normalize
 mean_image = np.mean(X_train, axis=0)
@@ -77,7 +98,7 @@ X_train /= 128.
 X_test /= 128.
 
 
-
+print(X_train.shape)
 
 
 
@@ -87,17 +108,17 @@ X_test /= 128.
 
 
  #Get back the convolutional part of a VGG network trained on ImageNet
-model_vgg16_conv = ResNet50(weights='imagenet', include_top=False)
-model_vgg16_conv.summary()
+model_resnet50_conv = ResNet50(input_shape=(I_R,I_R,3),weights='imagenet', include_top=False,pooling=max)
+model_resnet50_conv.summary()
 print("ss")
     #Create your own input format (here 3x200x200)
-input = Input(shape=(32,32,3),name = 'image_input')
+input = Input(shape=(I_R,I_R,3),name = 'image_input')
 print("ss2")
     #Use the generated model 
-output_vgg16_conv = model_vgg16_conv(input)
+output_resnet50_conv = model_resnet50_conv(input)
 print("ss3")
     #Add the fully-connected layers 
-x = Flatten(name='flatten')(output_vgg16_conv)
+x = Flatten(name='flatten')(output_resnet50_conv)
 x = Dense(512, activation='relu', name='fc1')(x)
 x = Dense(128, activation='relu', name='fc2')(x)
 x = Dense(10, activation='softmax', name='predictions')(x)
