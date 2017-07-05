@@ -57,8 +57,8 @@ csv_logger = CSVLogger('./results/resnet50imagenetpretrained_cifar10.csv')
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 2
-data_augmentation = True
+nb_epoch = 200
+data_augmentation = False
 
 # input image dimensions
 img_rows, img_cols = 197, 197
