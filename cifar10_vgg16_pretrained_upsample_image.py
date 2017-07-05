@@ -19,6 +19,7 @@ from keras.applications.vgg16 import preprocess_input
 from keras.layers import Input, Flatten, Dense
 from keras.models import Model
 import numpy as np
+from keras.callbacks import ModelCheckpoint
 
 
 from keras import backend as K
@@ -134,15 +135,29 @@ my_model.summary()
 my_model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
+
+# serialize model to JSON
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+    json_file.write(model_json)
+
+
 print(my_model.summary())
 if not data_augmentation:
     print('Not using data augmentation.')
+    # checkpoint
+    filepath="weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    callbacks_list = [checkpoint]
+    # Fit the model
+    #model.fit(X, Y, validation_split=0.33, epochs=150, batch_size=10, callbacks=callbacks_list, verbose=0)
+
     my_model.fit(X_train, Y_train,
               batch_size=batch_size,
               nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test),
               shuffle=True,
-              callbacks=[lr_reducer, early_stopper, csv_logger])
+              callbacks=[lr_reducer, early_stopper, csv_logger,callbacks_list])
 else:
     print('Using real-time data augmentation.')
     # This will do preprocessing and realtime data augmentation:
