@@ -29,29 +29,6 @@ seed = 7
 np.random.seed(seed)
 
 
-def get_vgg_pretrained_model():
-    #Get back the convolutional part of a VGG network trained on ImageNet
-    model_vgg16_conv = VGG16(weights='imagenet', include_top=False)
-    print(model_vgg16_conv.summary())
-    print("ss")
-    #Create your own input format (here 3x200x2000)
-    input = Input(shape=(3,32,32),name = 'image_input')
-
-    #Use the generated model 
-    output_vgg16_conv = model_vgg16_conv(input)
-
-    #Add the fully-connected layers 
-    x = Flatten(name='flatten')(output_vgg16_conv)
-    x = Dense(512, activation='relu', name='fc1')(x)
-    x = Dense(128, activation='relu', name='fc2')(x)
-    x = Dense(10, activation='softmax', name='predictions')(x)
-
-    #Create your own model 
-    my_model = Model(input=input, output=x)
-
-    #In the summary, weights and layers from VGG part will be hidden, but they will be fit during the training
-    my_model.summary()
-    return my_model
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
 early_stopper = EarlyStopping(min_delta=0.001, patience=20)
 csv_logger = CSVLogger('./results/vgg16imagenetpretrained_upsampleimage_cifar10_data_argumentation.csv')
@@ -78,7 +55,7 @@ X_train_original = X_train_original.astype('float32')
 X_test_original = X_test_original.astype('float32')
 
 
-# upsample it to size 224X224X3
+# upsample it to size 64X64X3
 
 
 X_train = np.zeros((X_train_original.shape[0],I_R,I_R,3))
