@@ -9,7 +9,7 @@ from __future__ import print_function
 from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import np_utils
-from keras.callbacks import ReduceLROnPlateau, CSVLogger,
+from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
 from scipy.misc import toimage, imresize
 import numpy as np
 #import resnet
@@ -58,12 +58,12 @@ csv_logger = CSVLogger('./results/vgg16imagenetpretrained_upsampleimage_cifar10.
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 2
-data_augmentation = True
+nb_epoch = 200
+data_augmentation = False
 
 # input image dimensions
 img_rows, img_cols = 197, 197
-I_R = 197
+I_R = 64
 # The CIFAR10 images are RGB.
 img_channels = 3
 
@@ -111,10 +111,10 @@ print(X_train.shape)
  #Get back the convolutional part of a VGG network trained on ImageNet
 model_vgg16_conv = VGG16(input_shape=(I_R,I_R,3),weights='imagenet', include_top=False,pooling=max)
 model_vgg16_conv.summary()
-print("ss")
+#print("ss")
     #Create your own input format (here 3x200x200)
 input = Input(shape=(I_R,I_R,3),name = 'image_input')
-print("ss2")
+#print("ss2")
     #Use the generated model 
 output_vgg16_conv = model_vgg16_conv(input)
 print("ss3")
@@ -137,8 +137,8 @@ my_model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # serialize model to JSON
-model_json = model.to_json()
-with open("model.json", "w") as json_file:
+model_json = my_model.to_json()
+with open("./results/model.json", "w") as json_file:
     json_file.write(model_json)
 
 
@@ -146,9 +146,9 @@ print(my_model.summary())
 if not data_augmentation:
     print('Not using data augmentation.')
     # checkpoint
-    filepath="weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-    callbacks_list = [checkpoint]
+   # filepath="./results/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
+   # checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+   # callbacks_list = [checkpoint]
     # Fit the model
     #model.fit(X, Y, validation_split=0.33, epochs=150, batch_size=10, callbacks=callbacks_list, verbose=0)
 
@@ -157,7 +157,7 @@ if not data_augmentation:
               nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test),
               shuffle=True,
-              callbacks=[lr_reducer, early_stopper, csv_logger,callbacks_list])
+              callbacks=[lr_reducer, early_stopper, csv_logger])
 else:
     print('Using real-time data augmentation.')
     # This will do preprocessing and realtime data augmentation:
@@ -183,3 +183,5 @@ else:
                         validation_data=(X_test, Y_test),
                         epochs=nb_epoch, verbose=1, max_q_size=100,
                         callbacks=[lr_reducer, early_stopper, csv_logger])
+my_model.save_weights("./results/vgg16_pretrained_upsample_model.h5")
+print("Saved model to disk")
